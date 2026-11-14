@@ -1,0 +1,15 @@
+instance_name: users_100_contents_30_seed_0
+experiment_name: Default
+run_name: null
+model_name: pulp
+penalty: 10.0
+time_limit: 60.0
+relative_gap: 0.001
+threads: 8
+
+pulp:
+  solver: highs
+
+lagrangian:
+  max_iterations: 1000
+  initial_step_size: 1.0
