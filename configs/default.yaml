@@ -1,10 +1,10 @@
 instance_name: users_100_contents_30_seed_0
 experiment_name: Default
 run_name: null
-model_name: pulp
+model_name: lagrangian
 penalty: 10.0
 time_limit: 60.0
-relative_gap: 0.001
+relative_gap_tol: 0.001
 threads: 8
 
 pulp:

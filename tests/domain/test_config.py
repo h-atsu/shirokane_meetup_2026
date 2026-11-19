@@ -14,6 +14,7 @@ def test_from_yaml_applies_typed_nested_overrides() -> None:
         [
             "model_name=lagrangian",
             "time_limit=120",
+            "relative_gap_tol=0.01",
             "pulp.solver=cbc",
             "lagrangian.max_iterations=2000",
         ],
@@ -21,6 +22,7 @@ def test_from_yaml_applies_typed_nested_overrides() -> None:
 
     assert config.model_name is ModelName.LAGRANGIAN
     assert config.time_limit == 120.0
+    assert config.relative_gap_tol == 0.01
     assert config.pulp.solver == "cbc"
     assert config.lagrangian.max_iterations == 2_000
 

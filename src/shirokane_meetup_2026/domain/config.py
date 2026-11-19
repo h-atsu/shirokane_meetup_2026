@@ -32,7 +32,7 @@ class Config:
     model_name: ModelName
     penalty: float
     time_limit: float
-    relative_gap: float
+    relative_gap_tol: float
     threads: int
     pulp: PulpConfig = field(default_factory=PulpConfig)
     lagrangian: LagrangianConfig = field(default_factory=LagrangianConfig)

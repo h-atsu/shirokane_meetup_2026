@@ -2,7 +2,7 @@ from typing import assert_never
 
 from shirokane_meetup_2026.domain.config import Config, ModelName
 from shirokane_meetup_2026.domain.data_models import InputData
-from shirokane_meetup_2026.models.lagrange_decomposition import LagrangianModel
+from shirokane_meetup_2026.models.lagrangian import LagrangianModel
 from shirokane_meetup_2026.models.model_base import ModelBase
 from shirokane_meetup_2026.models.pulp_model import PulpModel
 

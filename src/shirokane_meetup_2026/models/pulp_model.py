@@ -92,21 +92,21 @@ class PulpModel(ModelBase):
                 solver = pulp.HiGHS(
                     msg=True,
                     timeLimit=self.config.time_limit,
-                    gapRel=self.config.relative_gap,
+                    gapRel=self.config.relative_gap_tol,
                     threads=self.config.threads,
                 )
             case "cbc" | "coin":
                 solver = pulp.COIN_CMD(
                     msg=True,
                     timeLimit=self.config.time_limit,
-                    gapRel=self.config.relative_gap,
+                    gapRel=self.config.relative_gap_tol,
                     threads=self.config.threads,
                 )
             case "scip":
                 solver = pulp.SCIP_PY(
                     msg=True,
                     timeLimit=self.config.time_limit,
-                    gapRel=self.config.relative_gap,
+                    gapRel=self.config.relative_gap_tol,
                     threads=self.config.threads,
                 )
             case solver_name:
