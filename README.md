@@ -28,7 +28,8 @@ uv sync
 ├── scripts/
 │   ├── generate_data.py        # 入力データ生成
 │   ├── run_experiment.py       # 実験の実行
-│   └── compare_pulp_solvers.sh # PuLPソルバーの一括比較
+│   ├── compare_pulp_solvers.sh # PuLPソルバーの一括比較
+│   └── compare_models.sh       # PuLPとラグランジュ分解の比較
 ├── src/shirokane_meetup_2026/
 │   ├── domain/                 # 設定、入出力、評価指標の定義
 │   ├── models/                 # PuLP・ラグランジュ分解モデル
@@ -121,6 +122,31 @@ scripts/compare_pulp_solvers.sh
 
 各実行は共通のMLflow experiment `pulp_solver_comparison` に登録され、run名には実行時刻とソルバー名が付与されます。
 
+### 4. PuLPとラグランジュ分解を比較する
+
+PuLP/HiGHSとラグランジュ分解を、同じ入力データ、60秒の時間制限、0.1%の目標相対ギャップで実行します。このスクリプトも `users_10000_contents_100_seed_0` を使用します。
+
+```bash
+scripts/compare_models.sh
+```
+
+結果は共通のMLflow experiment `model_comparison` に登録され、ファイルは `outputs/model_comparison/` に保存されます。
+
+入力データや時間制限は環境変数で変更できます。
+
+```bash
+MODEL_COMPARISON_INSTANCE_NAME=users_100_contents_30_seed_0 \
+MODEL_COMPARISON_TIME_LIMIT=10 \
+scripts/compare_models.sh
+```
+
+個別にラグランジュ分解を実行する場合は、モデル名を明示します。
+
+```bash
+uv run python scripts/run_experiment.py \
+  --set model_name=lagrangian
+```
+
 ## 主な設定項目
 
 設定は [configs/default.yaml](configs/default.yaml) で管理します。
@@ -133,7 +159,7 @@ scripts/compare_pulp_solvers.sh
 | `model_name` | 使用するモデル。`pulp` または `lagrangian` |
 | `penalty` | 最低配信回数の不足に対するペナルティ |
 | `time_limit` | 求解時間の上限（秒） |
-| `relative_gap` | 許容する相対ギャップ |
+| `relative_gap_tol` | 求解を終了する相対ギャップ許容値 |
 | `threads` | ソルバーのスレッド数 |
 | `pulp.solver` | PuLPで使用するソルバー |
 | `lagrangian.max_iterations` | ラグランジュ分解の最大反復回数 |
