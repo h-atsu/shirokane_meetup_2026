@@ -29,8 +29,8 @@ uv sync
 │   ├── generate_data.py        # 入力データ生成
 │   ├── prepare_data.sh         # 比較用入力データの一括生成
 │   ├── run_experiment.py       # 実験の実行
-│   ├── compare_pulp_solvers.sh # PuLPソルバーの一括比較
-│   └── compare_models.sh       # 各モデルの一括比較
+│   ├── run_small_experiment.sh # 小規模実験の一括実行
+│   └── run_large_experiment.sh # 大規模実験の一括実行
 ├── src/shirokane_meetup_2026/
 │   ├── domain/                 # 設定、入出力、評価指標の定義
 │   ├── models/                 # PuLP・ラグランジュ分解モデル
@@ -114,47 +114,29 @@ MLflowへ登録せず、ファイル出力だけを行う場合は `--no-registe
 uv run python scripts/run_experiment.py --no-register-mlflow
 ```
 
-### 3. PuLPソルバーを比較する
+### 3. 小規模実験を実行する
 
-CBC、HiGHS、SCIPを同じ条件で順番に実行します。比較スクリプトは `users_10000_contents_100_seed_0` を使用するため、先に対象データを生成してください。
-
-```bash
-uv run python scripts/generate_data.py users_10000_contents_100_seed_0 \
-  --users 10000 \
-  --contents 100 \
-  --seed 0
-
-scripts/compare_pulp_solvers.sh
-```
-
-各実行は共通のMLflow experiment `pulp_solver_comparison` に登録され、run名には実行時刻とソルバー名が付与されます。
-
-### 4. モデルを比較する
-
-次の4モデルを同じ入力データで実行します。厳密解法・分解法には60秒の時間制限と0.01%の目標相対ギャップを設定します。
-
-- PuLP/HiGHS
-- NumPy実装のラグランジュ分解
-- [descartes-mip](https://github.com/h-atsu/descartes-mip) による自動ラグランジュ分解
-- スコア密度に基づく貪欲法
-
-比較スクリプトは `users_10000_contents_100_seed_0` を使用します。
+500ユーザー・100コンテンツに対して、貪欲法と、ペナルティ係数を変えたPuLP/HiGHS・ラグランジュ分解を実行します。
 
 ```bash
-scripts/compare_models.sh
+scripts/run_small_experiment.sh
 ```
 
-結果は共通のMLflow experiment `model_comparison` に登録され、ファイルは `outputs/model_comparison/` に保存されます。
+結果はMLflow experiment `small_experiment` と `outputs/small_experiment/` に保存されます。
 
-入力データや時間制限は環境変数で変更できます。
+### 4. 大規模実験を実行する
+
+30,000ユーザー・100コンテンツ、ペナルティ係数100の条件で、PuLP/HiGHSとラグランジュ分解を最大1時間ずつ実行します。
 
 ```bash
-MODEL_COMPARISON_INSTANCE_NAME=users_100_contents_30_seed_0 \
-MODEL_COMPARISON_TIME_LIMIT=10 \
-scripts/compare_models.sh
+scripts/run_large_experiment.sh
 ```
 
-個別にモデルを実行する場合は、モデル名を明示します。
+結果はMLflow experiment `large_experiment` と `outputs/large_experiment/` に保存されます。
+
+### 5. 個別にモデルを実行する
+
+モデル名を明示して個別に実行できます。
 
 ```bash
 uv run python scripts/run_experiment.py \
