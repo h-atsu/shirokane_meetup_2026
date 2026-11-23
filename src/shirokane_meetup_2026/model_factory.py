@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import assert_never
 
 from shirokane_meetup_2026.domain.config import Config, ModelName
@@ -9,10 +10,14 @@ from shirokane_meetup_2026.models.model_base import ModelBase
 from shirokane_meetup_2026.models.pulp_model import PulpModel
 
 
-def create_model(input_data: InputData, config: Config) -> ModelBase:
+def create_model(
+    input_data: InputData,
+    config: Config,
+    solver_log_path: str | Path | None = None,
+) -> ModelBase:
     match config.model_name:
         case ModelName.PULP:
-            return PulpModel(input_data, config)
+            return PulpModel(input_data, config, log_path=solver_log_path)
         case ModelName.LAGRANGIAN:
             return LagrangianModel(input_data, config)
         case ModelName.DESCARTES_MIP:

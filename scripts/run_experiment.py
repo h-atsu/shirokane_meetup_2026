@@ -19,12 +19,19 @@ from shirokane_meetup_2026.writer import ResultWriter
 
 app = typer.Typer(add_completion=False)
 logger = logging.getLogger(__name__)
+LOG_FORMAT = "%(asctime)s %(levelname)s %(message)s"
 
 
 def _create_output_dir(experiment_name: str, run_name: str) -> Path:
     output_dir = ROOT / "outputs" / experiment_name / run_name
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
+
+
+def _add_file_log_handler(path: Path) -> None:
+    handler = logging.FileHandler(path, encoding="utf-8")
+    handler.setFormatter(logging.Formatter(LOG_FORMAT))
+    logging.getLogger().addHandler(handler)
 
 
 @app.command()
@@ -60,9 +67,8 @@ def main(
     """YAML設定とCLI上書きを反映してコンテンツ配信最適化を実行する。"""
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(message)s",
+        format=LOG_FORMAT,
     )
-    logger.info("最適化設定を読み込みます config=%s", config_path)
 
     try:
         config = Config.from_yaml(config_path, overrides or ())
@@ -75,6 +81,8 @@ def main(
         "%Y%m%d_%H%M%S"
     )
     output_dir = _create_output_dir(config.experiment_name, config.run_name)
+    _add_file_log_handler(output_dir / "run.log")
+    logger.info("最適化設定を読み込みました config=%s", config_path)
 
     instance_dir = ROOT / "data" / config.instance_name
     loader = InstanceLoader(instance_dir)
@@ -90,7 +98,11 @@ def main(
     )
 
     logger.info("最適化モデルを構築します model=%s", config.model_name)
-    model = create_model(input_data, config)
+    model = create_model(
+        input_data,
+        config,
+        solver_log_path=output_dir / "solver.log",
+    )
     build_started_at = perf_counter()
     model.build_model()
     build_time = perf_counter() - build_started_at

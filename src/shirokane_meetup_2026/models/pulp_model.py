@@ -1,4 +1,5 @@
 from itertools import chain
+from pathlib import Path
 
 import numpy as np
 import pulp
@@ -10,8 +11,14 @@ from shirokane_meetup_2026.models.model_base import ModelBase
 
 
 class PulpModel(ModelBase):
-    def __init__(self, input_data: InputData, config: Config) -> None:
+    def __init__(
+        self,
+        input_data: InputData,
+        config: Config,
+        log_path: str | Path | None = None,
+    ) -> None:
         super().__init__(input_data, config)
+        self.log_path = Path(log_path) if log_path is not None else None
         self.problem = pulp.LpProblem("content_delivery", pulp.LpMaximize)
         self.assignment_variables: list[list[pulp.LpVariable]] = []
         self.shortage_variables: list[pulp.LpVariable] = []
@@ -87,6 +94,7 @@ class PulpModel(ModelBase):
         return self.solve_stats
 
     def _create_solver(self) -> pulp.LpSolver:
+        log_path = str(self.log_path) if self.log_path is not None else None
         match self.config.pulp.solver.lower():
             case "highs":
                 solver = pulp.HiGHS(
@@ -94,6 +102,7 @@ class PulpModel(ModelBase):
                     timeLimit=self.config.time_limit,
                     gapRel=self.config.relative_gap_tol,
                     threads=self.config.threads,
+                    logPath=log_path,
                 )
             case "cbc" | "coin":
                 solver = pulp.COIN_CMD(
@@ -101,6 +110,7 @@ class PulpModel(ModelBase):
                     timeLimit=self.config.time_limit,
                     gapRel=self.config.relative_gap_tol,
                     threads=self.config.threads,
+                    logPath=log_path,
                 )
             case "scip":
                 solver = pulp.SCIP_PY(
@@ -108,6 +118,7 @@ class PulpModel(ModelBase):
                     timeLimit=self.config.time_limit,
                     gapRel=self.config.relative_gap_tol,
                     threads=self.config.threads,
+                    logPath=log_path,
                 )
             case solver_name:
                 raise ValueError(f"Unsupported PuLP solver: {solver_name}")
