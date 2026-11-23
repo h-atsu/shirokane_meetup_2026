@@ -17,6 +17,8 @@ def test_from_yaml_applies_typed_nested_overrides() -> None:
             "relative_gap_tol=0.01",
             "pulp.solver=cbc",
             "lagrangian.max_iterations=2000",
+            "descartes_mip.max_iterations=3000",
+            "descartes_mip.parallel=true",
         ],
     )
 
@@ -25,6 +27,8 @@ def test_from_yaml_applies_typed_nested_overrides() -> None:
     assert config.relative_gap_tol == 0.01
     assert config.pulp.solver == "cbc"
     assert config.lagrangian.max_iterations == 2_000
+    assert config.descartes_mip.max_iterations == 3_000
+    assert config.descartes_mip.parallel
 
 
 def test_from_yaml_rejects_unknown_override() -> None:

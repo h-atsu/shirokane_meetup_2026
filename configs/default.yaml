@@ -13,3 +13,8 @@ pulp:
 lagrangian:
   max_iterations: 1000
   initial_step_size: 1.0
+
+descartes_mip:
+  max_iterations: 1000
+  polyak_factor: 1.0
+  parallel: false
