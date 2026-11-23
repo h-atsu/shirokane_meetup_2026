@@ -29,7 +29,7 @@ uv sync
 │   ├── generate_data.py        # 入力データ生成
 │   ├── run_experiment.py       # 実験の実行
 │   ├── compare_pulp_solvers.sh # PuLPソルバーの一括比較
-│   └── compare_models.sh       # PuLPとラグランジュ分解の比較
+│   └── compare_models.sh       # 各モデルの一括比較
 ├── src/shirokane_meetup_2026/
 │   ├── domain/                 # 設定、入出力、評価指標の定義
 │   ├── models/                 # PuLP・ラグランジュ分解モデル
@@ -122,9 +122,16 @@ scripts/compare_pulp_solvers.sh
 
 各実行は共通のMLflow experiment `pulp_solver_comparison` に登録され、run名には実行時刻とソルバー名が付与されます。
 
-### 4. PuLPとラグランジュ分解を比較する
+### 4. モデルを比較する
 
-PuLP/HiGHSとラグランジュ分解を、同じ入力データ、60秒の時間制限、0.1%の目標相対ギャップで実行します。このスクリプトも `users_10000_contents_100_seed_0` を使用します。
+次の4モデルを同じ入力データで実行します。厳密解法・分解法には60秒の時間制限と0.1%の目標相対ギャップを設定します。
+
+- PuLP/HiGHS
+- NumPy実装のラグランジュ分解
+- [descartes-mip](https://github.com/h-atsu/descartes-mip) による自動ラグランジュ分解
+- スコア密度に基づく貪欲法
+
+比較スクリプトは `users_10000_contents_100_seed_0` を使用します。
 
 ```bash
 scripts/compare_models.sh
@@ -140,12 +147,20 @@ MODEL_COMPARISON_TIME_LIMIT=10 \
 scripts/compare_models.sh
 ```
 
-個別にラグランジュ分解を実行する場合は、モデル名を明示します。
+個別にモデルを実行する場合は、モデル名を明示します。
 
 ```bash
 uv run python scripts/run_experiment.py \
   --set model_name=lagrangian
+
+uv run python scripts/run_experiment.py \
+  --set model_name=descartes_mip
+
+uv run python scripts/run_experiment.py \
+  --set model_name=greedy
 ```
+
+`greedy` は各ユーザーについて `score / weight` の降順に、残り容量へ収まる正のスコアのコンテンツを選択します。最低配信回数と不足ペナルティは選択には使用せず、選択後の評価指標に反映します。
 
 ## 主な設定項目
 
@@ -156,7 +171,7 @@ uv run python scripts/run_experiment.py \
 | `instance_name` | `data/` 以下にある入力データのディレクトリ名 |
 | `experiment_name` | 出力先とMLflowで使用する実験名 |
 | `run_name` | 実行名。`null` の場合は実行日時から自動生成 |
-| `model_name` | 使用するモデル。`pulp` または `lagrangian` |
+| `model_name` | 使用するモデル。`pulp`、`lagrangian`、`descartes_mip`、`greedy` |
 | `penalty` | 最低配信回数の不足に対するペナルティ |
 | `time_limit` | 求解時間の上限（秒） |
 | `relative_gap_tol` | 求解を終了する相対ギャップ許容値 |
@@ -164,6 +179,9 @@ uv run python scripts/run_experiment.py \
 | `pulp.solver` | PuLPで使用するソルバー |
 | `lagrangian.max_iterations` | ラグランジュ分解の最大反復回数 |
 | `lagrangian.initial_step_size` | ラグランジュ分解の初期ステップ幅 |
+| `descartes_mip.max_iterations` | descartes-mipの最大反復回数 |
+| `descartes_mip.polyak_factor` | descartes-mipのPolyakステップ係数 |
+| `descartes_mip.parallel` | 部分問題を並列に求解するか |
 
 ## 実行結果
 

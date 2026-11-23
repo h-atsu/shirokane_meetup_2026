@@ -29,3 +29,19 @@ uv run python scripts/run_experiment.py \
   --set "relative_gap_tol=${relative_gap_tol}" \
   --set "experiment_name=${experiment_name}" \
   --set "run_name=${batch_id}_lagrangian"
+
+echo "Running model: descartes_mip"
+uv run python scripts/run_experiment.py \
+  --set "instance_name=${instance_name}" \
+  --set model_name=descartes_mip \
+  --set "time_limit=${time_limit}" \
+  --set "relative_gap_tol=${relative_gap_tol}" \
+  --set "experiment_name=${experiment_name}" \
+  --set "run_name=${batch_id}_descartes_mip"
+
+echo "Running model: greedy"
+uv run python scripts/run_experiment.py \
+  --set "instance_name=${instance_name}" \
+  --set model_name=greedy \
+  --set "experiment_name=${experiment_name}" \
+  --set "run_name=${batch_id}_greedy"
