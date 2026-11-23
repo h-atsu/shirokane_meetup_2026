@@ -27,6 +27,7 @@ uv sync
 ├── outputs/                    # 実験結果（Git管理外）
 ├── scripts/
 │   ├── generate_data.py        # 入力データ生成
+│   ├── prepare_data.sh         # 比較用入力データの一括生成
 │   ├── run_experiment.py       # 実験の実行
 │   ├── compare_pulp_solvers.sh # PuLPソルバーの一括比較
 │   └── compare_models.sh       # 各モデルの一括比較
@@ -44,7 +45,13 @@ uv sync
 
 ### 1. 入力データを生成する
 
-デフォルト設定 `configs/default.yaml` が参照する小規模データを生成します。
+比較に使用する500ユーザー・100コンテンツと30,000ユーザー・100コンテンツのデータをまとめて生成します。
+
+```bash
+scripts/prepare_data.sh
+```
+
+生成物はそれぞれ `data/users_500_contents_100_seed_0/` と `data/users_30000_contents_100_seed_0/` に保存されます。個別の条件で生成する場合は、次のように `generate_data.py` を実行します。
 
 ```bash
 uv run python scripts/generate_data.py users_100_contents_30_seed_0 \
@@ -124,7 +131,7 @@ scripts/compare_pulp_solvers.sh
 
 ### 4. モデルを比較する
 
-次の4モデルを同じ入力データで実行します。厳密解法・分解法には60秒の時間制限と0.1%の目標相対ギャップを設定します。
+次の4モデルを同じ入力データで実行します。厳密解法・分解法には60秒の時間制限と0.01%の目標相対ギャップを設定します。
 
 - PuLP/HiGHS
 - NumPy実装のラグランジュ分解
@@ -189,6 +196,8 @@ uv run python scripts/run_experiment.py \
 
 ```text
 outputs/<experiment_name>/<run_name>/
+├── run.log                    # アプリケーションとPythonモデルのログ
+├── solver.log                 # PuLPソルバーのネイティブログ（PuLP実行時）
 ├── config.yaml                # 実行時の設定
 ├── solve_stats.json           # 求解ステータスと実行時間
 ├── metrics.json               # 解の評価指標
